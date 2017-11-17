@@ -16,6 +16,7 @@
 
 package xyz.fz.springBootVertx;
 
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +63,8 @@ public class Application {
         if (serverPort > 0) {
             vertx.deployVerticle(httpVerticle);
         }
-        vertx.deployVerticle(abcVerticle);
+        DeploymentOptions abcDeploymentOptions = new DeploymentOptions();
+        abcDeploymentOptions.setWorker(true);
+        vertx.deployVerticle(abcVerticle, abcDeploymentOptions);
     }
 }
