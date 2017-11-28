@@ -34,6 +34,14 @@ public class AbcVerticle extends AbstractVerticle {
             }
         });
 
+        eventBus.consumer("abcRecord", msg -> {
+            try {
+                msg.reply(abcService.record(msg.body().toString()));
+            } catch (Exception e) {
+                msg.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), "error: " + e.getMessage());
+            }
+        });
+
         eventBus.consumer("abcJson", msg -> {
             try {
                 JsonObject requestMap = (JsonObject) msg.body();

@@ -75,6 +75,18 @@ public class HttpVerticle extends AbstractVerticle {
             });
         });
 
+        router.route("/abc/record").handler(routingContext -> {
+            String no = routingContext.request().getParam("no");
+            HttpServerResponse response = routingContext.response();
+            vertx.eventBus().send("abcRecord", no, ar -> {
+                if (ar.succeeded()) {
+                    response.end(Result.ofData(ar.result().body()));
+                } else {
+                    response.end(Result.ofMessage(ar.cause().getMessage()));
+                }
+            });
+        });
+
         router.route("/abc/json").handler(routingContext -> {
             HttpServerResponse response = routingContext.response();
             routingContext.request().bodyHandler(event -> {
