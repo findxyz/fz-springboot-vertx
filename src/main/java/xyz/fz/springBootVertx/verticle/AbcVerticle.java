@@ -4,19 +4,21 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import xyz.fz.springBootVertx.annotation.MyWorkerVerticle;
 import xyz.fz.springBootVertx.service.AbcService;
 
-import javax.annotation.Resource;
 import java.util.UUID;
 
 @Component
+@MyWorkerVerticle
 public class AbcVerticle extends AbstractVerticle {
 
     private static final String ID = UUID.randomUUID().toString();
 
-    @Resource
+    @Autowired
     private AbcService abcService;
 
     @Value("${vertx.name}")
@@ -44,8 +46,8 @@ public class AbcVerticle extends AbstractVerticle {
 
         eventBus.consumer("abcJson", msg -> {
             try {
-                JsonObject requestMap = (JsonObject) msg.body();
-                msg.reply(requestMap);
+                JsonObject requestJsonObject = (JsonObject) msg.body();
+                msg.reply(requestJsonObject);
             } catch (Exception e) {
                 msg.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), "error: " + e.getMessage());
             }

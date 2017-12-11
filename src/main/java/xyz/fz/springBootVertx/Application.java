@@ -17,6 +17,7 @@
 package xyz.fz.springBootVertx;
 
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,10 +25,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import xyz.fz.springBootVertx.annotation.MyWorkerVerticle;
+import xyz.fz.springBootVertx.util.SpringContextHelper;
 import xyz.fz.springBootVertx.verticle.AbcVerticle;
 import xyz.fz.springBootVertx.verticle.HttpVerticle;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * @author Thomas Segismont
@@ -63,8 +67,11 @@ public class Application {
         if (serverPort > 0) {
             vertx.deployVerticle(httpVerticle);
         }
-        DeploymentOptions abcDeploymentOptions = new DeploymentOptions();
-        abcDeploymentOptions.setWorker(true);
-        vertx.deployVerticle(abcVerticle, abcDeploymentOptions);
+        Map<String, Object> myWorkerVerticleMap = SpringContextHelper.getBeansWithAnnotation(MyWorkerVerticle.class);
+        for (Map.Entry entry : myWorkerVerticleMap.entrySet()) {
+            DeploymentOptions workerDeploymentOptions = new DeploymentOptions();
+            workerDeploymentOptions.setWorker(true);
+            vertx.deployVerticle((Verticle) entry.getValue(), workerDeploymentOptions);
+        }
     }
 }

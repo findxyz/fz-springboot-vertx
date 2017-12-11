@@ -17,17 +17,19 @@
 package xyz.fz.springBootVertx.verticle;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Router;
+import org.jboss.resteasy.plugins.server.vertx.VertxRequestHandler;
+import org.jboss.resteasy.plugins.server.vertx.VertxResteasyDeployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import xyz.fz.springBootVertx.model.Result;
-import xyz.fz.springBootVertx.util.BaseUtil;
+import org.springframework.stereotype.Controller;
+import xyz.fz.springBootVertx.filter.BaseFilter;
+import xyz.fz.springBootVertx.provider.RestExceptionMapper;
+import xyz.fz.springBootVertx.util.SpringContextHelper;
+
+import java.util.Map;
 
 /**
  * @author Thomas Segismont
@@ -41,78 +43,27 @@ public class HttpVerticle extends AbstractVerticle {
     private Integer serverPort;
 
     @Override
-    public void start() throws Exception {
+    public void start() {
         HttpServer httpServer = vertx.createHttpServer();
-        Router router = Router.router(vertx);
 
-        router.route().failureHandler(routingContext -> {
-            Throwable failure = routingContext.failure();
-            logger.error(BaseUtil.getExceptionStackTrace(failure));
-            routingContext.response().end(Result.ofMessage(failure.getMessage()));
-        });
+        // vertx resteasy deployment
+        VertxResteasyDeployment deployment = new VertxResteasyDeployment();
+        deployment.start();
 
-        router.route("/*").handler(routingContext -> {
-            logger.debug("/* filter");
-            HttpServerResponse response = routingContext.response();
-            response.putHeader("content-type", "application/json");
-            routingContext.next();
-        });
+        // Resource and Provider
+        Map<String, Object> controllerMap = SpringContextHelper.getBeansWithAnnotation(Controller.class);
+        for (Map.Entry<String, Object> entry : controllerMap.entrySet()) {
+            deployment.getRegistry().addSingletonResource(entry.getValue());
+        }
+        deployment.getProviderFactory().getContainerRequestFilterRegistry().registerClass(BaseFilter.class);
+        deployment.getProviderFactory().registerProvider(RestExceptionMapper.class);
 
-        router.route("/abc/*").handler(routingContext -> {
-            logger.debug("/abc/* filter");
-            routingContext.next();
-        });
+        // Set an handler calling RestEasy
+        httpServer.requestHandler(new VertxRequestHandler(vertx, deployment));
 
-        router.route("/abc").handler(routingContext -> {
-            String name = routingContext.request().getParam("name");
-            HttpServerResponse response = routingContext.response();
-            vertx.eventBus().send("abcAddress", name, ar -> {
-                if (ar.succeeded()) {
-                    response.end(Result.ofData(ar.result().body()));
-                } else {
-                    response.end(Result.ofMessage(ar.cause().getMessage()));
-                }
-            });
-        });
-
-        router.route("/abc/record").handler(routingContext -> {
-            String no = routingContext.request().getParam("no");
-            HttpServerResponse response = routingContext.response();
-            vertx.eventBus().send("abcRecord", no, ar -> {
-                if (ar.succeeded()) {
-                    response.end(Result.ofData(ar.result().body()));
-                } else {
-                    response.end(Result.ofMessage(ar.cause().getMessage()));
-                }
-            });
-        });
-
-        router.route("/abc/json").handler(routingContext -> {
-            HttpServerResponse response = routingContext.response();
-            routingContext.request().bodyHandler(event -> {
-                vertx.eventBus().send("abcJson", convert2JsonObject(event, response), ar -> {
-                    if (ar.succeeded()) {
-                        JsonObject result = (JsonObject) ar.result().body();
-                        response.end(Result.ofData(result.getMap()));
-                    } else {
-                        response.end(Result.ofMessage(ar.cause().getMessage()));
-                    }
-                });
-            });
-        });
-
-        httpServer.requestHandler(router::accept).listen(serverPort);
+        // Start the server
+        httpServer.listen(serverPort);
 
         logger.info("vertx httpServer started at port:{}", serverPort);
-    }
-
-    private JsonObject convert2JsonObject(Buffer event, HttpServerResponse response) {
-        try {
-            String requestJson = event.toString();
-            return new JsonObject(requestJson);
-        } catch (Exception e) {
-            response.end(Result.ofMessage(e.getMessage()));
-            throw e;
-        }
     }
 }
