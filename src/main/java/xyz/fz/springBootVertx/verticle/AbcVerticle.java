@@ -30,7 +30,7 @@ public class AbcVerticle extends AbstractVerticle {
         EventBus eventBus = vertx.eventBus();
         eventBus.consumer("abcAddress", msg -> {
             try {
-                msg.reply(abcService.hello("from vertxName: " + vertxName + ", " + msg.body().toString()));
+                msg.reply(abcService.hello("from vertxName: " + vertxName + ID + ", " + msg.body().toString()));
             } catch (Exception e) {
                 msg.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), "error: " + e.getMessage());
             }
