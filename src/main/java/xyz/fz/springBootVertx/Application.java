@@ -42,13 +42,13 @@ public class Application {
 
     private final Vertx vertx;
 
-    @Autowired
-    public Application(Vertx vertx) {
-        this.vertx = vertx;
-    }
+    private final HttpVerticle httpVerticle;
 
     @Autowired
-    private HttpVerticle httpVerticle;
+    public Application(Vertx vertx, HttpVerticle httpVerticle) {
+        this.vertx = vertx;
+        this.httpVerticle = httpVerticle;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
