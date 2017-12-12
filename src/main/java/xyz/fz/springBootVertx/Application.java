@@ -27,10 +27,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import xyz.fz.springBootVertx.annotation.MyWorkerVerticle;
 import xyz.fz.springBootVertx.util.SpringContextHelper;
-import xyz.fz.springBootVertx.verticle.AbcVerticle;
 import xyz.fz.springBootVertx.verticle.HttpVerticle;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -49,11 +47,8 @@ public class Application {
         this.vertx = vertx;
     }
 
-    @Resource
+    @Autowired
     private HttpVerticle httpVerticle;
-
-    @Resource
-    private AbcVerticle abcVerticle;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -69,9 +64,11 @@ public class Application {
         }
         Map<String, Object> myWorkerVerticleMap = SpringContextHelper.getBeansWithAnnotation(MyWorkerVerticle.class);
         for (Map.Entry entry : myWorkerVerticleMap.entrySet()) {
-            DeploymentOptions workerDeploymentOptions = new DeploymentOptions();
-            workerDeploymentOptions.setWorker(true);
-            vertx.deployVerticle((Verticle) entry.getValue(), workerDeploymentOptions);
+            for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+                DeploymentOptions workerDeploymentOptions = new DeploymentOptions();
+                workerDeploymentOptions.setWorker(true);
+                vertx.deployVerticle((Verticle) entry.getValue(), workerDeploymentOptions);
+            }
         }
     }
 }
