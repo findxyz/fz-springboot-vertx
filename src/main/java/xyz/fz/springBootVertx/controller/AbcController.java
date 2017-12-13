@@ -15,6 +15,9 @@ import javax.ws.rs.core.Context;
 import java.util.Map;
 
 import static xyz.fz.springBootVertx.util.EventBusUtil.eventBusSend;
+import static xyz.fz.springBootVertx.verticle.AbcVerticle.ABC_BUS_ADDRESS;
+import static xyz.fz.springBootVertx.verticle.AbcVerticle.ABC_BUS_JSON;
+import static xyz.fz.springBootVertx.verticle.AbcVerticle.ABC_BUS_RECORD;
 
 @Controller
 @Path("/abc")
@@ -27,7 +30,7 @@ public class AbcController {
                     @Suspended final AsyncResponse asyncResponse,
                     @QueryParam("name") String name) {
         try {
-            eventBusSend(vertx, "abcAddress", name, asyncResponse);
+            eventBusSend(vertx, ABC_BUS_ADDRESS, name, asyncResponse);
         } catch (Exception e) {
             asyncResponse.resume(Result.ofMessage(e.getMessage()));
         }
@@ -40,7 +43,7 @@ public class AbcController {
                        @Suspended final AsyncResponse asyncResponse,
                        @QueryParam("no") String no) {
         try {
-            eventBusSend(vertx, "abcRecord", no, asyncResponse);
+            eventBusSend(vertx, ABC_BUS_RECORD, no, asyncResponse);
         } catch (Exception e) {
             asyncResponse.resume(Result.ofMessage(e.getMessage()));
         }
@@ -53,7 +56,7 @@ public class AbcController {
                      @Suspended final AsyncResponse asyncResponse,
                      Map<String, Object> bodyMap) {
         try {
-            eventBusSend(vertx, "abcJson", bodyMap, asyncResponse);
+            eventBusSend(vertx, ABC_BUS_JSON, bodyMap, asyncResponse);
         } catch (Exception e) {
             asyncResponse.resume(Result.ofMessage(e.getMessage()));
         }

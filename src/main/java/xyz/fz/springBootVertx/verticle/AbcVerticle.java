@@ -24,11 +24,19 @@ public class AbcVerticle extends AbstractVerticle {
     @Value("${vertx.name}")
     private String vertxName;
 
+    private static final String ADDRESS_PREFIX = AbcVerticle.class.getName() + ".";
+
+    public static final String ABC_BUS_ADDRESS = ADDRESS_PREFIX + "abcAddress";
+
+    public static final String ABC_BUS_RECORD = ADDRESS_PREFIX + "abcRecord";
+
+    public static final String ABC_BUS_JSON = ADDRESS_PREFIX + "abcJson";
+
     @Override
     public void start() {
 
         EventBus eventBus = vertx.eventBus();
-        eventBus.consumer("abcAddress", msg -> {
+        eventBus.consumer(ABC_BUS_ADDRESS, msg -> {
             try {
                 msg.reply(abcService.hello("from vertxName: " + vertxName + ID + ", " + msg.body().toString()));
             } catch (Exception e) {
@@ -36,7 +44,7 @@ public class AbcVerticle extends AbstractVerticle {
             }
         });
 
-        eventBus.consumer("abcRecord", msg -> {
+        eventBus.consumer(ABC_BUS_RECORD, msg -> {
             try {
                 msg.reply(abcService.record(msg.body().toString()));
             } catch (Exception e) {
@@ -44,7 +52,7 @@ public class AbcVerticle extends AbstractVerticle {
             }
         });
 
-        eventBus.consumer("abcJson", msg -> {
+        eventBus.consumer(ABC_BUS_JSON, msg -> {
             try {
                 JsonObject requestJsonObject = (JsonObject) msg.body();
                 msg.reply(requestJsonObject);
