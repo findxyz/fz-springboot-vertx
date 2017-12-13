@@ -63,8 +63,9 @@ public class Application {
             vertx.deployVerticle(httpVerticle);
         }
         Map<String, Object> myWorkerVerticleMap = SpringContextHelper.getBeansWithAnnotation(MyWorkerVerticle.class);
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
         for (Map.Entry entry : myWorkerVerticleMap.entrySet()) {
-            for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+            for (int i = 0; i < availableProcessors; i++) {
                 DeploymentOptions workerDeploymentOptions = new DeploymentOptions();
                 workerDeploymentOptions.setWorker(true);
                 vertx.deployVerticle((Verticle) entry.getValue(), workerDeploymentOptions);
