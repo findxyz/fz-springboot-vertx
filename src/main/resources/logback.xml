@@ -60,7 +60,7 @@
     <!--</logger>-->
 
     <!-- Application Loggers -->
-    <logger name="xyz.fz" level="INFO"/>
+    <logger name="xyz.fz" level="WARN"/>
 
     <!-- Root Logger -->
     <root level="INFO">

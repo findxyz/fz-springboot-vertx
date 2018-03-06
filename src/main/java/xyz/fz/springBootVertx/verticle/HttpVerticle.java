@@ -64,6 +64,6 @@ public class HttpVerticle extends AbstractVerticle {
         // Start the server
         httpServer.listen(serverPort);
 
-        logger.info("vertx httpServer started at port:{}", serverPort);
+        logger.warn("vertx httpServer started at port:{}", serverPort);
     }
 }
