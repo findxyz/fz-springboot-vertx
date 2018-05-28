@@ -58,7 +58,7 @@ public class Application {
      * Deploy verticles when the Spring application is ready.
      */
     @EventListener
-    void deployVerticles(ApplicationReadyEvent event) {
+    public void deployVerticles(ApplicationReadyEvent event) {
         if (serverPort > 0) {
             vertx.deployVerticle(httpVerticle);
         }
