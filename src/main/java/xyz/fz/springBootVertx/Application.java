@@ -25,7 +25,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import xyz.fz.springBootVertx.annotation.MyWorkerVerticle;
+import xyz.fz.springBootVertx.annotation.SpringWorkerVerticle;
 import xyz.fz.springBootVertx.util.SpringContextHelper;
 import xyz.fz.springBootVertx.verticle.HttpVerticle;
 
@@ -59,16 +59,18 @@ public class Application {
      */
     @EventListener
     public void deployVerticles(ApplicationReadyEvent event) {
+        System.out.println(event);
         if (serverPort > 0) {
             vertx.deployVerticle(httpVerticle);
         }
-        Map<String, Object> myWorkerVerticleMap = SpringContextHelper.getBeansWithAnnotation(MyWorkerVerticle.class);
+        Map<String, Object> myWorkerVerticleMap = SpringContextHelper.getBeansWithAnnotation(SpringWorkerVerticle.class);
         int availableProcessors = Runtime.getRuntime().availableProcessors();
+        DeploymentOptions workerDeploymentOptions = new DeploymentOptions();
+        workerDeploymentOptions.setWorker(true);
+        workerDeploymentOptions.setWorkerPoolSize(availableProcessors * 4);
         for (Map.Entry entry : myWorkerVerticleMap.entrySet()) {
-            for (int i = 0; i < availableProcessors; i++) {
-                DeploymentOptions workerDeploymentOptions = new DeploymentOptions();
-                workerDeploymentOptions.setWorker(true);
-                vertx.deployVerticle((Verticle) entry.getValue(), workerDeploymentOptions);
+            for (int i = 0; i < availableProcessors * 2; i++) {
+                vertx.deployVerticle((Verticle) SpringContextHelper.getBean(entry.getValue().getClass()), workerDeploymentOptions);
             }
         }
     }

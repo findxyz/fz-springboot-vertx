@@ -18,9 +18,12 @@ public class SpringContextHelper implements ApplicationContextAware {
         context = applicationContext;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T getBean(String beanName, Class<T> clazz) {
         return (T) context.getBean(beanName, clazz);
+    }
+
+    public static <T> T getBean(Class<T> clazz) {
+        return (T) context.getBean(clazz);
     }
 
     public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> aClass) {

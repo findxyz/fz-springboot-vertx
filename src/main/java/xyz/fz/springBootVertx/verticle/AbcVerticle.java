@@ -6,20 +6,17 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import xyz.fz.springBootVertx.annotation.MyWorkerVerticle;
+import xyz.fz.springBootVertx.annotation.SpringWorkerVerticle;
 import xyz.fz.springBootVertx.service.AbcService;
 
 import java.util.UUID;
 
-@Component
-@MyWorkerVerticle
+@SpringWorkerVerticle
 public class AbcVerticle extends AbstractVerticle {
 
-    private static final String ID = UUID.randomUUID().toString();
+    private final String ID = UUID.randomUUID().toString();
 
-    @Autowired
-    private AbcService abcService;
+    private final AbcService abcService;
 
     @Value("${vertx.name}")
     private String vertxName;
@@ -31,6 +28,11 @@ public class AbcVerticle extends AbstractVerticle {
     public static final String ABC_BUS_RECORD = ADDRESS_PREFIX + "abcRecord";
 
     public static final String ABC_BUS_JSON = ADDRESS_PREFIX + "abcJson";
+
+    @Autowired
+    public AbcVerticle(AbcService abcService) {
+        this.abcService = abcService;
+    }
 
     @Override
     public void start() {
