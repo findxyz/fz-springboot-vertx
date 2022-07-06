@@ -18,7 +18,7 @@
     <properties>
         <vertx.version>3.5.4</vertx.version>
         <java.version>1.8</java.version>
-        <hazelcast.version>3.8.2</hazelcast.version>
+        <hazelcast.version>3.11</hazelcast.version>
         <mainClass>xyz.fz.springBootVertx.Application</mainClass>
     </properties>
 
